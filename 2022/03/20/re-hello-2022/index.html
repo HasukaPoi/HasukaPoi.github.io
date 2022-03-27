@@ -28,7 +28,7 @@
 <meta property="og:description" content="我又回来了。这其实是这个blog第二次rebuild了。最早的第一版里的文章都直接丢掉了呢。（嘛就算留下也没什么用所以其实也无所谓了）然后二代目根本就没写东西，只写了个一万人写过的，Hexo怎么初期配置。 于是这是三代目。主要做了这几件事。  把HasukaPoi&#x2F;hexo-source里的东西搬下来重新建了本地repo，并force push到HasukaPoi&#x2F;Hasuka">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-03-20T09:28:10.000Z">
-<meta property="article:modified_time" content="2022-03-20T09:28:11.243Z">
+<meta property="article:modified_time" content="2022-03-27T07:43:02.675Z">
 <meta property="article:author" content="Hasuka">
 <meta name="twitter:card" content="summary">
 
@@ -183,10 +183,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-20 17:28:10 / 修改时间：17:28:11" itemprop="dateCreated datePublished" datetime="2022-03-20T17:28:10+08:00">2022-03-20</time>
+              <time title="创建时间：2022-03-20 17:28:10" itemprop="dateCreated datePublished" datetime="2022-03-20T17:28:10+08:00">2022-03-20</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-27 15:43:02" itemprop="dateModified" datetime="2022-03-27T15:43:02+08:00">2022-03-27</time>
+              </span>
 
           
 
@@ -210,7 +216,7 @@
 
 <h2 id="闲扯"><a href="#闲扯" class="headerlink" title="闲扯"></a>闲扯</h2><p>为什么我的GitHub出现了这么长的一个空窗期呢，我也不知道。但是也补不上了xsk<br>这次突然意识到VSCode很好用。<br>哦对了最新版NexT怎么没有像样的文档…………还是我眼瞎找不到。<br>以及为什么写点东西这么费劲。</p>
 <h2 id="关于升级"><a href="#关于升级" class="headerlink" title="关于升级"></a>关于升级</h2><p>参考这里：<a target="_blank" rel="noopener" href="https://geneliunx.com/2020/10/29/hexo-version-upgrade/">hexo 版本升级 | Geneliunx</a></p>
-<p>简而言之，<code>npm-check</code> → <code>npm-upgrade</code> → <code>npm update</code> –save<br>前两个都是以包的形式存在的，没有的话<code>npm install -g</code>一下哦。</p>
+<p>简而言之，<code>npm-check</code> → <code>npm-upgrade</code> → <code>npm update --save</code><br>前两个都是以包的形式存在的，没有的话<code>npm install -g</code>一下哦。</p>
 <h2 id="另一个奇怪的警告信息"><a href="#另一个奇怪的警告信息" class="headerlink" title="另一个奇怪的警告信息"></a>另一个奇怪的警告信息</h2><p>启动本地hexo server的时候会提示</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">Hasuka@DESKTOP-A4FIAHE MINGW64 /d/Learning/hexo-source-2019 (hexo_src)</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">hexo s</span></span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://localhost:4000 . Press Ctrl+C to stop.</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;lineno&#x27; of module exports inside circular dependency</span><br><span class="line">(Use `node --trace-warnings ...` to show where the warning was created)</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;column&#x27; of module exports inside circular dependency</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;filename&#x27; of module exports inside circular dependency</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;lineno&#x27; of module exports inside circular dependency</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;column&#x27; of module exports inside circular dependency</span><br><span class="line">(node:21164) Warning: Accessing non-existent property &#x27;filename&#x27; of module exports inside circular dependency</span><br></pre></td></tr></table></figure>
 
@@ -222,6 +228,9 @@
 <p>如果还是有警告，可以cd node_module&#x2F;nib，强行把它的stylus升级到0.54.8（不推荐这么做）</p>
 </blockquote>
 <p>估计这样可以解决，但算了，是warning又不是error（てへぺろ</p>
+<h2 id="Velocity-is-not-defined"><a href="#Velocity-is-not-defined" class="headerlink" title="Velocity is not defined"></a>Velocity is not defined</h2><p>deploy出来的静态HTML出来这玩意儿。</p>
+<p>…………为什么本地Server的时候是好的，generate和deploy就坏了啊。</p>
+<p>搜了一圈解决方法没用，倒是偶然发现早年设置的CNAME（不再使用）删掉之后莫名其妙就好了。看来问题就在这里</p>
 <p>感谢您的阅读。</p>
 
     </div>
@@ -300,7 +309,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%B2%E6%89%AF"><span class="nav-number">1.</span> <span class="nav-text">闲扯</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%8D%87%E7%BA%A7"><span class="nav-number">2.</span> <span class="nav-text">关于升级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%A5%87%E6%80%AA%E7%9A%84%E8%AD%A6%E5%91%8A%E4%BF%A1%E6%81%AF"><span class="nav-number">3.</span> <span class="nav-text">另一个奇怪的警告信息</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%B2%E6%89%AF"><span class="nav-number">1.</span> <span class="nav-text">闲扯</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E5%8D%87%E7%BA%A7"><span class="nav-number">2.</span> <span class="nav-text">关于升级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%A5%87%E6%80%AA%E7%9A%84%E8%AD%A6%E5%91%8A%E4%BF%A1%E6%81%AF"><span class="nav-number">3.</span> <span class="nav-text">另一个奇怪的警告信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Velocity-is-not-defined"><span class="nav-number">4.</span> <span class="nav-text">Velocity is not defined</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
