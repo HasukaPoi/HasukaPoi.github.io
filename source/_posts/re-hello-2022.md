@@ -26,7 +26,7 @@ tags:
 
 参考这里：[hexo 版本升级 | Geneliunx](https://geneliunx.com/2020/10/29/hexo-version-upgrade/)
 
-简而言之，`npm-check` → `npm-upgrade` → `npm update` --save
+简而言之，`npm-check` → `npm-upgrade` → `npm update --save`
 前两个都是以包的形式存在的，没有的话`npm install -g`一下哦。
 
 ## 另一个奇怪的警告信息
@@ -59,6 +59,14 @@ UPDATE：修改版本号从`0.54.5`为`~0.54.5`并没有用。改成`0.54.8`也�
 > 如果还是有警告，可以cd node_module/nib，强行把它的stylus升级到0.54.8（不推荐这么做）
 
 估计这样可以解决，但算了，是warning又不是error（てへぺろ
+
+## Velocity is not defined
+
+deploy出来的静态HTML出来这玩意儿。
+
+…………为什么本地Server的时候是好的，generate和deploy就坏了啊。
+
+搜了一圈解决方法没用，倒是偶然发现早年设置的CNAME（不再使用）删掉之后莫名其妙就好了。看来问题就在这里
 
 感谢您的阅读。
 
