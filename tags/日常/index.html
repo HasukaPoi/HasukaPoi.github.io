@@ -20,19 +20,15 @@
     var CONFIG = {"hostname":"hasukapoi.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="就是说命令行确实很难记，但比起满世界找好用的GUI工具（不如……自己写一个？），还是记吧。 这本自用的cheatsheet，不作罗列，按场景区分。">
-<meta property="og:type" content="article">
-<meta property="og:title" content="git cheatsheet">
-<meta property="og:url" content="http://hasukapoi.github.io/2022/04/17/git-cheatsheet/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="HasukaPoi.github.io">
+<meta property="og:url" content="http://hasukapoi.github.io/tags/%E6%97%A5%E5%B8%B8/index.html">
 <meta property="og:site_name" content="HasukaPoi.github.io">
-<meta property="og:description" content="就是说命令行确实很难记，但比起满世界找好用的GUI工具（不如……自己写一个？），还是记吧。 这本自用的cheatsheet，不作罗列，按场景区分。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-04-17T02:49:58.000Z">
-<meta property="article:modified_time" content="2022-04-17T03:04:09.056Z">
 <meta property="article:author" content="Hasuka">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://hasukapoi.github.io/2022/04/17/git-cheatsheet/">
+<link rel="canonical" href="http://hasukapoi.github.io/tags/%E6%97%A5%E5%B8%B8/">
 
 
 <script id="page-configurations">
@@ -40,12 +36,12 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true,
+    isPost : false,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>git cheatsheet | HasukaPoi.github.io</title>
+  <title>标签: 日常 | HasukaPoi.github.io</title>
   
 
 
@@ -154,94 +150,51 @@
         <div class="content-wrap">
           
 
-          <div class="content post posts-expand">
+          <div class="content tag">
             
 
-    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://hasukapoi.github.io/2022/04/17/git-cheatsheet/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/meguru.jpg">
-      <meta itemprop="name" content="Hasuka">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HasukaPoi.github.io">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          git cheatsheet
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2022-04-17 10:49:58 / 修改时间：11:04:09" itemprop="dateCreated datePublished" datetime="2022-04-17T10:49:58+08:00">2022-04-17</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
+  
+  <div class="post-block">
+    <div class="posts-collapse">
+      <div class="collection-title">
+        <h2 class="collection-header">日常
+          <small>标签</small>
+        </h2>
+      </div>
 
       
-        <p>就是说命令行确实很难记，但比起满世界找好用的GUI工具（不如……自己写一个？），还是记吧。</p>
-<p>这本自用的cheatsheet，不作罗列，按场景区分。</p>
-<span id="more"></span>
-
-<h2 id="git-reset"><a href="#git-reset" class="headerlink" title="git reset"></a>git reset</h2><p>～想要撤销commit的时候～</p>
-<p>首先有这三个概念。版本库——所有commit过的东西。暂存区——用git add添加了但还没有提交的东西。工作区——在本地修改了的东西。</p>
-<p>这三个区是逐级递进的。工作区改东西→添加到暂存区→把暂存区的东西提交。</p>
-<p>正好，就对应了<code>git reset</code>的三个选项，<code>--soft</code> <code>--mixed</code> <code>--hard</code>。其中mixed是默认选项。</p>
-<p>而<code>git reset</code>做的最主要的事情是什么呢。是<strong>重设</strong>HEAD指针指向的的位置。就比如说原本是下面这个样子的。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit A --&gt; commit B --&gt; commit C --&gt; commit D</span><br><span class="line">                                        |</span><br><span class="line">                                       HEAD</span><br></pre></td></tr></table></figure>
-
-<p>执行了<code>git reset C</code>或者<code>git reset --mixed C</code>之后呢指针就变成这样了。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">commit A --&gt; commit B --&gt; commit C --&gt; commit D</span><br><span class="line">                           |</span><br><span class="line">                          HEAD</span><br></pre></td></tr></table></figure>
-
-<p>那里面的文件呢？<strong>除了hard以外</strong>，mixed和soft都不会对本地文件做出变更。<br>soft时，对暂存区、工作区不改动。使用场景：？<br>mixed时，会把目标版本之后的版本丢到暂存区。使用场景举例：改了一些东西之后觉得这些东西可以和前几个版本合并成一个commit更干净，可以直接 reset 再 commit。<br>hard时，会清空暂存区和工作区。使用场景举例：彻底回滚，放弃修改。</p>
-
+    <div class="collection-year">
+      <span class="collection-header">2022</span>
     </div>
 
-    
-    
-    
+  <article itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
 
-      <footer class="post-footer">
+      <div class="post-meta">
+        <time itemprop="dateCreated"
+              datetime="2022-05-03T21:11:18+08:00"
+              content="2022-05-03">
+          05-03
+        </time>
+      </div>
 
-        
+      <div class="post-title">
+          <a class="post-title-link" href="/2022/05/03/joycon-on-pc/" itemprop="url">
+            <span itemprop="name">Joy-Con on PC</span>
+          </a>
+      </div>
 
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2022/03/20/re-hello-2022/" rel="prev" title="Re- Re- Hello World?">
-      <i class="fa fa-chevron-left"></i> Re- Re- Hello World?
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/05/03/joycon-on-pc/" rel="next" title="Joy-Con on PC">
-      Joy-Con on PC <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
+    </header>
   </article>
+
+    </div>
+  </div>
   
   
+  
+
   
 
 
@@ -294,7 +247,6 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#git-reset"><span class="nav-number">1.</span> <span class="nav-text">git reset</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
