@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"hasukapoi.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="前言※前言中废话比较多，没兴趣的可以略过。 在油管上看宝可梦视频的时候，发现许多制作者的解说字幕中都用到了点阵风格的字体，比如基于宝可梦第一、第二世代制作的免费字体 ポケモンフォント。 使用例：  我也觉得点阵字体很适合用作热敏纸打印机（单色，低清）的打印字体，能在小尺寸的同时做到美观和易读。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="提取TTF中内嵌的点阵字模并转换为点阵风格的TrueType字体">
+<meta property="og:url" content="http://hasukapoi.github.io/2022/05/08/bdf2truetype/index.html">
+<meta property="og:site_name" content="HasukaPoi.github.io">
+<meta property="og:description" content="前言※前言中废话比较多，没兴趣的可以略过。 在油管上看宝可梦视频的时候，发现许多制作者的解说字幕中都用到了点阵风格的字体，比如基于宝可梦第一、第二世代制作的免费字体 ポケモンフォント。 使用例：  我也觉得点阵字体很适合用作热敏纸打印机（单色，低清）的打印字体，能在小尺寸的同时做到美观和易读。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://hasukapoi.github.io/images/PokemonFontSample.png">
+<meta property="og:image" content="http://hasukapoi.github.io/images/BBX.png">
+<meta property="article:published_time" content="2022-05-08T05:21:39.000Z">
+<meta property="article:modified_time" content="2022-05-08T08:11:32.740Z">
+<meta property="article:author" content="Hasuka">
+<meta property="article:tag" content="技术">
+<meta property="article:tag" content="字体">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://hasukapoi.github.io/images/PokemonFontSample.png">
+
+<link rel="canonical" href="http://hasukapoi.github.io/2022/05/08/bdf2truetype/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>提取TTF中内嵌的点阵字模并转换为点阵风格的TrueType字体 | HasukaPoi.github.io</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">HasukaPoi.github.io</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">blogを名乗りしたHomepage</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-id-card"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-读山海经">
+
+    <a href="/du-shanhaijing/" rel="section"><i class="fa fa-fw fa-book"></i>读山海经</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://hasukapoi.github.io/2022/05/08/bdf2truetype/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/meguru.jpg">
+      <meta itemprop="name" content="Hasuka">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="HasukaPoi.github.io">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          提取TTF中内嵌的点阵字模并转换为点阵风格的TrueType字体
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-05-08 13:21:39 / 修改时间：16:11:32" itemprop="dateCreated datePublished" datetime="2022-05-08T13:21:39+08:00">2022-05-08</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>※前言中废话比较多，没兴趣的可以略过。</p>
+<p>在油管上看宝可梦视频的时候，发现许多制作者的解说字幕中都用到了点阵风格的字体，比如基于宝可梦第一、第二世代制作的免费字体 <a target="_blank" rel="noopener" href="https://nue2004.info/program/pkmn/">ポケモンフォント</a>。</p>
+<p>使用例：</p>
+<p><img src="/../images/PokemonFontSample.png" title="这个字体还收录了UI相关的要素"></p>
+<p>我也觉得点阵字体很适合用作热敏纸打印机（单色，低清）的打印字体，能在小尺寸的同时做到美观和易读。</p>
+<span id="more"></span>
+
+<p>在玩宝可梦第三、第四世代的时候我发现游戏中的点阵字体也很美观，想要制作一个类似的字体。做来干嘛？当然是玩儿……</p>
+<h3 id="前言2"><a href="#前言2" class="headerlink" title="前言2"></a>前言2</h3><p>此前使用 <a target="_blank" rel="noopener" href="http://mplus-fonts.osdn.jp/mplus-bitmap-fonts/index.html">M+ BITMAP FONT</a> 中的等幅欧文字型 <code>mplus_f12r.bdf</code> 替换 <a target="_blank" rel="noopener" href="https://github.com/ACh-K/Cubic-11">俐方体11号</a> 中可变幅英数时发现BDF字体格式既方便应用程序读取解析编辑（虽然Windows下的编辑器几乎没有），也方便使用者直接对其阅读和修改。</p>
+<p>当时参考了这篇文章：<a target="_blank" rel="noopener" href="https://ldt.indienova.com/u/hata/blogread/26923">中文像素字体制作</a>（来自 indienova.com）</p>
+<p>然后就是全网瞎几把搜“如何制作点阵字体”，刨去无用的内容之后剩下的东西不多，经过乱七八糟的阅读之后结论：无论是从头制作点阵字体还是从现成的字模转换，都是从点阵本身出发，再转换为TrueType的矢量图形会比较方便。</p>
+<p>既然要转换的话，源文件是什么格式都无所谓了，最笨的办法大概就是直接去游戏里截图做成位图然后用Python脚本读取转换。</p>
+<h2 id="提取TTF内嵌点阵并转换为独立的TTF"><a href="#提取TTF内嵌点阵并转换为独立的TTF" class="headerlink" title="提取TTF内嵌点阵并转换为独立的TTF"></a>提取TTF内嵌点阵并转换为独立的TTF</h2><p>其实说实话，跟 <a target="_blank" rel="noopener" href="https://ldt.indienova.com/u/hata/blogread/26923">中文像素字体制作</a> 里实现的东西大差不差，甚至还比他少一步合并的过程。主要是对其中脚本进行了一个bug的修复和功能的扩展。</p>
+<h3 id="获取BDF"><a href="#获取BDF" class="headerlink" title="获取BDF"></a>获取BDF</h3><p>这里使用了 Zfull-GB 字体文件中内嵌的10px像素点阵（中文部分实际为9×9。顺带一提这个字体的12px像素点阵很好看）</p>
+<p>BDF文件的提取方法参考自：<a target="_blank" rel="noopener" href="https://jingyan.baidu.com/article/3ea51489c092d852e61bbae0.html">使用FontForge提取和嵌入TTF字体中的点阵字体</a> 的STEP1~9。</p>
+<p>用<a target="_blank" rel="noopener" href="http://fontforge.github.io/en-US/">FontForge</a>打开TTF文件，会提示是否加载内嵌点阵字体，选择需要的字体打开。<br>打开后选择[File]→[Generate Fonts…]，文件名下方两个下拉框依次选择<code>No Outline Font</code>和<code>BDF</code>，输入需要的字体尺寸导出就得到了单独的点阵字体BDF文件。</p>
+<h3 id="转换点阵字体为矢量字体"><a href="#转换点阵字体为矢量字体" class="headerlink" title="转换点阵字体为矢量字体"></a>转换点阵字体为矢量字体</h3><p>一上来当然是直接照抄 <a target="_blank" rel="noopener" href="https://ldt.indienova.com/u/hata/blogread/26923">中文像素字体制作</a> 中的Python脚本，发现它第一行的x坐标值设歪了……怪不得预览图中的字体看着不对劲。</p>
+<p>在准备好FontForge和bdflib支持后直接跳到这篇文章的第3步，新建一个<code>bdf_to_sfd.py</code><sup>（原文有拼写错误xsk）</sup></p>
+<p>然后我就为了调整字体的基线位置、基线上高度、基线下高度、字宽断断续续花了两天去阅读语法说明和API文档。</p>
+<h4 id="需要了解的知识和文档"><a href="#需要了解的知识和文档" class="headerlink" title="需要了解的知识和文档"></a>需要了解的知识和文档</h4><h5 id="首先是EM-Square"><a href="#首先是EM-Square" class="headerlink" title="首先是EM Square"></a>首先是EM Square</h5><p><a target="_blank" rel="noopener" href="http://designwithfontforge.com/zh-CN/The_EM_Square.html">FontForge与字体设计：EM Square</a></p>
+<p>其中，“x高度”与本文无关，只需要理解“基线”的存在，相当于我们在笔记本上写字时的那条线，大多数文字都写在这条线<strong>上</strong>，有一些字符则是“跨在这条线上”。</p>
+<p>到字体文件的metadata<sup>（不知道是否可以这么说但差不多就是这个意思）</sup>里，就需要设置基线上高度(Font Ascent)、基线下高度(Font Descent)。</p>
+<h5 id="BDF文件的结构"><a href="#BDF文件的结构" class="headerlink" title="BDF文件的结构"></a>BDF文件的结构</h5><p>有高就有宽。高度是字体的属性而宽度是字模(Glyph)的属性。</p>
+<p>比如定义一个高10px的字体，其中全体汉字的宽度为10，全体半角字符的宽度为5。</p>
+<p>但，不是所有字符都占满了这一个5×10的格子的，比如标点符号<code>,.!</code> 上标<code>²³</code>等。对于这种字符，在BDF中可以只描述有图像的部分，并使用FOUNDINGBOX的语法来描述图像相对于原点（<strong>位于基线上</strong>）的偏移。<strong>正方向为x轴向右y轴向上。</strong></p>
+<p>关于BDF语法结构，只找到一篇用中文描述的：<a target="_blank" rel="noopener" href="https://blog.csdn.net/ppxmeng/article/details/5883677">BDF 字体文件格式(转)</a></p>
+<p>在本文中需要关注的内容有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">字体定义部分</span><br><span class="line">PIXEL_SIZE 10   //像素尺寸为10</span><br><span class="line">FONT_ASCENT 8   //基线上高度为8</span><br><span class="line">FONT_DESCENT 2  //基线下高度为2</span><br><span class="line"></span><br><span class="line">字体定义和字模定义均可设置</span><br><span class="line">DWIDTH 10 0     //下一字符原点至当前字符原点的距离。</span><br><span class="line">                //比如10 0 代表下一字符出现在</span><br><span class="line">                //当前字符右侧10px，上方0px。</span><br><span class="line">BBX 5 5 0 1     //字模的宽、高、x轴偏移、y轴偏移。</span><br><span class="line">                //四个参数依次称为bbW,bbH,bbX,bbY</span><br><span class="line"></span><br><span class="line">字模定义部分</span><br><span class="line">BITMAP          //声明下一行起为该字模的图像。</span><br><span class="line">                //图像由16进制描述，转为2进制就是图像本图啦。</span><br></pre></td></tr></table></figure>
+
+<p>这里搞清楚原点位置花了我好久，以³为例。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">STARTCHAR uni00B3</span><br><span class="line">ENCODING 179</span><br><span class="line">SWIDTH 500 0</span><br><span class="line">DWIDTH 5 0</span><br><span class="line">SWIDTH1 1000 0</span><br><span class="line">BBX 3 4 1 3</span><br><span class="line">BITMAP</span><br><span class="line">E0</span><br><span class="line">40</span><br><span class="line">20</span><br><span class="line">E0</span><br><span class="line">ENDCHAR</span><br></pre></td></tr></table></figure>
+<p>前文提过，坐标轴的方向为x轴向右y轴向上，bbX和bbY遵循这个坐标系。</p>
+<p>但是，BITMAP下面的图像部分参照自然书写顺序，也就是从左往右，<strong>从上到下</strong>的。bbW和bbH遵循这个顺序。画成示意图像下面这样。</p>
+<p><img src="/../images/BBX.png" title="以上标3为例描述BBX的语法"></p>
+<p>顺带一提在bdflib解析后，<code>__str__()</code>函数返回的图像长下面这样。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">|###</span><br><span class="line">|.#.</span><br><span class="line">|..#</span><br><span class="line">|###</span><br><span class="line">|...</span><br><span class="line">|...</span><br><span class="line">+---</span><br></pre></td></tr></table></figure>
+
+<p>可以看到它已经囊括了bbX和bbY的信息。其中bbX就不需要再次使用了，而为了实现从上到下的绘制，还是需要进行一个实际高度的获取，即<code>bbH+bbY</code>的值。</p>
+<p>（其实直接去算这个字符串有多少行也行……）</p>
+<h3 id="修改后的脚本文件"><a href="#修改后的脚本文件" class="headerlink" title="修改后的脚本文件"></a>修改后的脚本文件</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> bdflib <span class="keyword">import</span> reader</span><br><span class="line"><span class="keyword">import</span> fontforge</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">OpenBDF</span>(<span class="params">path</span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(path, <span class="string">&quot;rb&quot;</span>) <span class="keyword">as</span> handle:</span><br><span class="line">        <span class="keyword">return</span> reader.read_bdf(handle)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">Start</span>():</span><br><span class="line">    bdf_font = OpenBDF(<span class="string">r&quot;Zfull-GB-10.bdf&quot;</span>)  <span class="comment"># 手动设定</span></span><br><span class="line">    sfd_font = fontforge.font()</span><br><span class="line">    sfd_font.encoding = <span class="string">&quot;unicode&quot;</span>  <span class="comment"># 手动指定</span></span><br><span class="line">    sfd_font.ascent = bdf_font.properties[<span class="string">b&#x27;FONT_ASCENT&#x27;</span>]*<span class="number">100</span></span><br><span class="line">    sfd_font.descent = bdf_font.properties[<span class="string">b&#x27;FONT_DESCENT&#x27;</span>]*<span class="number">100</span></span><br><span class="line">    <span class="built_in">print</span>(bdf_font.properties)</span><br><span class="line">    <span class="keyword">for</span> bdf_glyph <span class="keyword">in</span> bdf_font.glyphs:</span><br><span class="line">        x = <span class="number">0</span></span><br><span class="line">        y = bdf_glyph.bbH + bdf_glyph.bbY - <span class="number">1</span></span><br><span class="line">        <span class="comment">#print(bdf_glyph.codepoint)</span></span><br><span class="line">        glyph = sfd_font.createMappedChar(bdf_glyph.codepoint)</span><br><span class="line">        <span class="keyword">if</span> bdf_glyph.advance &gt; <span class="number">0</span>:</span><br><span class="line">            w = bdf_glyph.advance * <span class="number">100</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            w = <span class="number">1000</span>  <span class="comment"># 不知为何获取不到全局定义，故手动指定</span></span><br><span class="line">        vw = bdf_glyph.bbH * <span class="number">100</span></span><br><span class="line">        pen = glyph.glyphPen()</span><br><span class="line">        <span class="keyword">for</span> ch <span class="keyword">in</span> bdf_glyph.__str__():</span><br><span class="line">            <span class="keyword">if</span> ch == <span class="string">&#x27;\n&#x27;</span>:</span><br><span class="line">                y = y - <span class="number">1</span></span><br><span class="line">                x = -<span class="number">1</span></span><br><span class="line">                <span class="comment">#print(&quot;&quot;)</span></span><br><span class="line">            <span class="keyword">elif</span> ch == <span class="string">&#x27;#&#x27;</span>:</span><br><span class="line">                pen.moveTo((<span class="number">100</span> * x, <span class="number">100</span> * y))</span><br><span class="line">                pen.lineTo((<span class="number">100</span> * x, <span class="number">100</span> * y + <span class="number">100</span>))</span><br><span class="line">                pen.lineTo((<span class="number">100</span> * x + <span class="number">100</span>, <span class="number">100</span> * y + <span class="number">100</span>))</span><br><span class="line">                pen.lineTo((<span class="number">100</span> * x + <span class="number">100</span>, <span class="number">100</span> * y))</span><br><span class="line">                pen.closePath()</span><br><span class="line">                <span class="comment">#print(&quot;#&quot;, end=&quot;&quot;)</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="comment">#print(&quot;.&quot;, end=&quot;&quot;)</span></span><br><span class="line">            x = x + <span class="number">1</span></span><br><span class="line">        pen = <span class="literal">None</span></span><br><span class="line">        <span class="comment">#print()</span></span><br><span class="line">        glyph.width = w  <span class="comment"># 在绘制完后指定才有效</span></span><br><span class="line">        glyph.vwidth = vw  <span class="comment"># 在绘制完后指定才有效</span></span><br><span class="line">        glyph.removeOverlap()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># sdf_font.autoWidth()</span></span><br><span class="line">    sfd_font.save(<span class="string">r&quot;converted.sfd&quot;</span>)  <span class="comment"># 手动设定</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Start()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="尾声"><a href="#尾声" class="headerlink" title="尾声"></a>尾声</h2><p>导出完检查了几个字模确认这回宽高边距什么都没问题就导出TTF了，结果今天发现空格的字模消失了导致空格变成了方框wwwwwwwww</p>
+<p>接下来当然是继续折腾宝可梦字体啦。虽然没什么进展但是找到了可以参考的项目。</p>
+<p>感谢您的阅读。</p>
+<h2 id="文中未提及的参考资料以及有用的网站"><a href="#文中未提及的参考资料以及有用的网站" class="headerlink" title="文中未提及的参考资料以及有用的网站"></a>文中未提及的参考资料以及有用的网站</h2><p><a target="_blank" rel="noopener" href="https://bdflib.readthedocs.io/en/stable/reference.html">bdflib API Reference</a></p>
+<p><a target="_blank" rel="noopener" href="https://fontforge.org/docs/scripting/python/fontforge.html">fontforge Python Scripting 文档</a></p>
+<p><a target="_blank" rel="noopener" href="http://designwithfontforge.com/zh-CN/">FontForge 与字体设计</a></p>
+<p><a target="_blank" rel="noopener" href="https://unicode-table.com/cn/">Unicode 字符百科</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/23405248">如何将点阵汉字矢量化</a>（本文未参考）</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%8A%80%E6%9C%AF/" rel="tag"># 技术</a>
+              <a href="/tags/%E5%AD%97%E4%BD%93/" rel="tag"># 字体</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/05/03/joycon-on-pc/" rel="prev" title="Joy-Con on PC">
+      <i class="fa fa-chevron-left"></i> Joy-Con on PC
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%802"><span class="nav-number">1.1.</span> <span class="nav-text">前言2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E5%8F%96TTF%E5%86%85%E5%B5%8C%E7%82%B9%E9%98%B5%E5%B9%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E7%8B%AC%E7%AB%8B%E7%9A%84TTF"><span class="nav-number">2.</span> <span class="nav-text">提取TTF内嵌点阵并转换为独立的TTF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96BDF"><span class="nav-number">2.1.</span> <span class="nav-text">获取BDF</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BD%AC%E6%8D%A2%E7%82%B9%E9%98%B5%E5%AD%97%E4%BD%93%E4%B8%BA%E7%9F%A2%E9%87%8F%E5%AD%97%E4%BD%93"><span class="nav-number">2.2.</span> <span class="nav-text">转换点阵字体为矢量字体</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E4%BA%86%E8%A7%A3%E7%9A%84%E7%9F%A5%E8%AF%86%E5%92%8C%E6%96%87%E6%A1%A3"><span class="nav-number">2.2.1.</span> <span class="nav-text">需要了解的知识和文档</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E6%98%AFEM-Square"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">首先是EM Square</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BDF%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">BDF文件的结构</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%90%8E%E7%9A%84%E8%84%9A%E6%9C%AC%E6%96%87%E4%BB%B6"><span class="nav-number">2.3.</span> <span class="nav-text">修改后的脚本文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%BE%E5%A3%B0"><span class="nav-number">3.</span> <span class="nav-text">尾声</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%B8%AD%E6%9C%AA%E6%8F%90%E5%8F%8A%E7%9A%84%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%E4%BB%A5%E5%8F%8A%E6%9C%89%E7%94%A8%E7%9A%84%E7%BD%91%E7%AB%99"><span class="nav-number">4.</span> <span class="nav-text">文中未提及的参考资料以及有用的网站</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Hasuka"
+      src="/images/meguru.jpg">
+  <p class="site-author-name" itemprop="name">Hasuka</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/HasukaPoi" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;HasukaPoi" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://weibo.com/SawatariYuu" title="Weibo → https:&#x2F;&#x2F;weibo.com&#x2F;SawatariYuu" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/hasukapyon" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;hasukapyon" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hasuka</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
